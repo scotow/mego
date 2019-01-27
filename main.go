@@ -18,7 +18,7 @@ const (
 
 var (
 	speedFlag 	= flag.Uint("l", 0, "speed limit passed to megadl as --limit-speed")
-	silentFlag	= flag.Bool("s", false, "silent mode. do not pipe megadl to stdout")
+	silentFlag	= flag.Bool("s", false, "silent mode. do not pipe megadl's stdout nor stderr")
 	linkRegex 	= regexp.MustCompile(`^(?:https?://)?mega\.nz/#.+$`)
 )
 
