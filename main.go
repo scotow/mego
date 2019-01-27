@@ -22,17 +22,22 @@ var (
 	linkRegex 	= regexp.MustCompile(`^(?:https?://)?mega\.nz/#.+$`)
 )
 
+var (
+	outLogger = log.New(os.Stdout, "", log.LstdFlags)
+	errLogger = log.New(os.Stderr, "", log.LstdFlags)
+)
+
 func isValidLink(link string) bool {
 	return linkRegex.MatchString(link)
 }
 
 func downloadRepeat(link string) {
 	for !downloadCommand(link) {
-		log.Printf("Download of \"%s\" failed, waiting %s before retrying.\n", link, retryInterval.String())
+		errLogger.Printf("Download of \"%s\" failed, waiting %s before retrying.\n", link, retryInterval.String())
 		time.Sleep(retryInterval)
 	}
 
-	log.Printf("Download of \"%s\" done.\n", link)
+	outLogger.Printf("Download of \"%s\" done.\n", link)
 }
 
 func downloadCommand(link string) bool {
@@ -46,7 +51,7 @@ func downloadCommand(link string) bool {
 func downloadFromFilesList(path string) {
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
-		log.Printf("Cannot open file \"%s\". Skipping. (%s)\n", path, err.Error())
+		errLogger.Printf("Cannot open file \"%s\". Skipping. (%s)\n", path, err.Error())
 		return
 	}
 
@@ -66,12 +71,12 @@ func downloadFromFilesList(path string) {
 	// Download each links in list.
 	for i, link := range links {
 		if link[0] == '#' {
-			log.Printf("Skipping \"%s\"\n", link)
+			errLogger.Printf("Skipping \"%s\".\n", link)
 			continue
 		}
 
 		if !isValidLink(link) {
-			log.Printf("Invalid link %s. Skipping.\n", link)
+			errLogger.Printf("Invalid link %s. Skipping.\n", link)
 			links[i] = fmt.Sprintf("#-%s", link)
 			writeFilesList(path, links)
 			continue
@@ -86,7 +91,7 @@ func downloadFromFilesList(path string) {
 func writeFilesList(path string, links []string) {
 	err := ioutil.WriteFile(path, []byte(strings.Join(links, "\n")), 0664)
 	if err != nil {
-		log.Printf("Cannot write file \"%s\". Skipping. (%s)\n", path, err.Error())
+		errLogger.Printf("Cannot write file \"%s\". (%s)\n", path, err.Error())
 	}
 }
 
@@ -101,5 +106,5 @@ func main() {
 		}
 	}
 
-	log.Println("All downloads done.")
+	outLogger.Println("All downloads done.")
 }
