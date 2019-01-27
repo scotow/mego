@@ -17,8 +17,9 @@ const (
 )
 
 var (
-	speedFlag = flag.Uint("s", 0, "is passed to megadl as --limit-speed")
-	linkRegex = regexp.MustCompile(`^(?:https?://)?mega\.nz/#.+$`)
+	speedFlag 	= flag.Uint("l", 0, "speed limit passed to megadl as --limit-speed")
+	silentFlag	= flag.Bool("s", false, "silent mode. do not pipe megadl to stdout")
+	linkRegex 	= regexp.MustCompile(`^(?:https?://)?mega\.nz/#.+$`)
 )
 
 func isValidLink(link string) bool {
@@ -27,7 +28,7 @@ func isValidLink(link string) bool {
 
 func downloadRepeat(link string) {
 	for !downloadCommand(link) {
-		log.Printf("Download of \"%s\" failed, waiting before retrying.\n", link)
+		log.Printf("Download of \"%s\" failed, waiting %s before retrying.\n", link, retryInterval.String())
 		time.Sleep(retryInterval)
 	}
 
@@ -36,7 +37,9 @@ func downloadRepeat(link string) {
 
 func downloadCommand(link string) bool {
 	cmd := exec.Command("megadl", fmt.Sprintf("--limit-speed=%d", *speedFlag), link)
-	cmd.Stdout, cmd.Stderr = os.Stdout, os.Stderr
+	if !*silentFlag {
+		cmd.Stdout, cmd.Stderr = os.Stdout, os.Stderr
+	}
 	return cmd.Run() == nil
 }
 
