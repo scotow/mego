@@ -12,7 +12,7 @@ While using the `megadl` command to download a bunch of large files, I often fou
 
 Indeed, Mega allows users to download a few (apparently not fixed) number of GB per day (once again, apparently not fixed).
 
-By default `megadl` only retries 3 times when this error occured, preventing the download of file during the night or while being away from the computer. To fix this problem, `mego` check the error code returned by `megadl`, and retry if the command failed.
+By default `megadl` only retries 3 times when this error occurred, preventing the download of file during the night or while being away from the computer. To fix this problem, `mego` check the error code returned by `megadl`, and retry if the command failed.
 
 #### List of files
 
