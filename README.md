@@ -1,6 +1,6 @@
 # mego 💾
 
-Mego is a simple [megatools](https://github.com/megous/megatools) command wrapper, allowing you to use the `megadl` command with a download list file and add an auto-try tool.
+Mego is a simple [megatools](https://github.com/megous/megatools) command wrapper, allowing you to use the `megadl` command with a download list of links and add an auto-try tool.
 
 ### Ideas
 
