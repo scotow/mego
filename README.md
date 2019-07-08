@@ -29,6 +29,7 @@ mego [-l SPEED] [-s] MEGA_LINK... LIST_PATH...
 
   -l uint     speed limit passed to megadl as --limit-speed
   -s          silent mode. do not pipe megadl's stdout nor stderr
+  -r          interval between two retries
 ```
 
 NB: The whole content of a *list file* is read and kept in memory. Every time a file is downloaded, the content of the *list file* will be overwritten. So please do not use a *list file* as a queue during execution.  

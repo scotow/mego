@@ -1,8 +1,10 @@
 package main
 
 import (
+	"bytes"
 	"flag"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"os"
@@ -17,9 +19,11 @@ const (
 )
 
 var (
-	speedFlag 	= flag.Uint("l", 0, "speed limit passed to megadl as --limit-speed")
-	silentFlag	= flag.Bool("s", false, "silent mode. do not pipe megadl's stdout nor stderr")
-	linkRegex 	= regexp.MustCompile(`^(?:https?://)?mega\.nz/#.+$`)
+	speedFlag    = flag.Uint("l", 0, "speed limit passed to megadl as --limit-speed")
+	silentFlag   = flag.Bool("s", false, "silent mode. do not pipe megadl's stdout nor stderr")
+	intervalFlag = flag.Duration("r", retryInterval, "interval between two retries")
+
+	linkRegex = regexp.MustCompile(`^(?:https?://)?mega\.nz/#.+$`)
 )
 
 var (
@@ -34,7 +38,7 @@ func isValidLink(link string) bool {
 func downloadRepeat(link string) {
 	for !downloadCommand(link) {
 		errLogger.Printf("Download of \"%s\" failed, waiting %s before retrying.\n", link, retryInterval.String())
-		time.Sleep(retryInterval)
+		time.Sleep(*intervalFlag)
 	}
 
 	outLogger.Printf("Download of \"%s\" done.\n", link)
@@ -42,10 +46,32 @@ func downloadRepeat(link string) {
 
 func downloadCommand(link string) bool {
 	cmd := exec.Command("megadl", fmt.Sprintf("--limit-speed=%d", *speedFlag), link)
-	if !*silentFlag {
-		cmd.Stdout, cmd.Stderr = os.Stdout, os.Stderr
+
+	var errBuff bytes.Buffer
+	if *silentFlag {
+		cmd.Stderr = &errBuff
+	} else {
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = io.MultiWriter(os.Stderr, &errBuff)
 	}
-	return cmd.Run() == nil
+
+	err := cmd.Run()
+	if err != nil {
+		logs := strings.Split(strings.TrimSpace(errBuff.String()), "\n")
+		if len(logs) == 0 {
+			return false
+		}
+
+		for _, line := range logs {
+			if !strings.HasPrefix(line, "ERROR: File already exists at ") {
+				return false
+			}
+		}
+
+		return true
+	}
+
+	return false
 }
 
 func downloadFromFilesList(path string) {
@@ -71,7 +97,7 @@ func downloadFromFilesList(path string) {
 	// Download each links in list.
 	for i, link := range links {
 		if link[0] == '#' {
-			errLogger.Printf("Skipping \"%s\".\n", link)
+			errLogger.Printf("Skipping \"%s\".\n", link[1:])
 			continue
 		}
 
@@ -106,5 +132,5 @@ func main() {
 		}
 	}
 
-	outLogger.Println("All downloads done.")
+	outLogger.Println("All download(s) done.")
 }
