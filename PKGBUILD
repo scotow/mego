@@ -10,7 +10,7 @@ license=('MIT')
 depends=('megatools')
 makedepends=('go' 'git')
 source=("${pkgname}-${pkgver}.tar.gz::https://github.com/scotow/${pkgname}/archive/${pkgver}.tar.gz")
-sha256sums=('7b952705c25e06c25f82c2c76c20c34e45b2487e4af1ff7bf39ae22daeed8407')
+sha256sums=('b9b8435fb7dbc1dc4a6e778d35f2be492e9872bfc6752538c5a55ed15b8d81d3')
 
 prepare(){
   mkdir -p src/github.com/scotow
