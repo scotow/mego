@@ -20,7 +20,7 @@ const (
 
 var (
 	speedFlag    = flag.Uint("l", 0, "speed limit passed to megadl as --limit-speed")
-	pipeFlag     = flag.Bool("s", false, "pipe mode. pipe megadl's stdout and stderr")
+	pipeFlag     = flag.Bool("p", false, "pipe megadl's stdout and stderr")
 	intervalFlag = flag.Duration("r", retryInterval, "interval between two retries")
 
 	linkRegex = regexp.MustCompile(`^(?:https?://)?mega\.nz/#.+$`)
