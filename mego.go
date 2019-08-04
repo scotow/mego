@@ -20,7 +20,7 @@ const (
 
 var (
 	speedFlag    = flag.Uint("l", 0, "speed limit passed to megadl as --limit-speed")
-	silentFlag   = flag.Bool("s", false, "silent mode. do not pipe megadl's stdout nor stderr")
+	pipeFlag     = flag.Bool("s", false, "pipe mode. pipe megadl's stdout and stderr")
 	intervalFlag = flag.Duration("r", retryInterval, "interval between two retries")
 
 	linkRegex = regexp.MustCompile(`^(?:https?://)?mega\.nz/#.+$`)
@@ -33,6 +33,17 @@ var (
 
 func isValidLink(link string) bool {
 	return linkRegex.MatchString(link)
+}
+
+func isAlreadyDownloadedError(line, link string) bool {
+	if strings.HasPrefix(line, "ERROR: File already exists at ") {
+		return true
+	}
+	// Typo in the original program.
+	if strings.HasPrefix(line, fmt.Sprintf("ERROR: Download failed for '%s': Can't rename donwloaded temporary file ", link)) {
+		return true
+	}
+	return false
 }
 
 func downloadRepeat(link string) {
@@ -48,30 +59,29 @@ func downloadCommand(link string) bool {
 	cmd := exec.Command("megadl", fmt.Sprintf("--limit-speed=%d", *speedFlag), link)
 
 	var errBuff bytes.Buffer
-	if *silentFlag {
-		cmd.Stderr = &errBuff
-	} else {
+	if *pipeFlag {
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = io.MultiWriter(os.Stderr, &errBuff)
+	} else {
+		cmd.Stderr = &errBuff
 	}
 
 	err := cmd.Run()
 	if err != nil {
-		logs := strings.Split(strings.TrimSpace(errBuff.String()), "\n")
-		if len(logs) == 0 {
-			return false
-		}
+		logLines := strings.Split(errBuff.String(), "\n")
 
-		for _, line := range logs {
-			if !strings.HasPrefix(line, "ERROR: File already exists at ") {
+		for _, line := range logLines {
+			line = strings.TrimSpace(line)
+			if len(line) == 0 {
+				continue
+			}
+			if !isAlreadyDownloadedError(line, link) {
 				return false
 			}
 		}
-
-		return true
 	}
 
-	return false
+	return true
 }
 
 func downloadFromFilesList(path string) {
