@@ -20,6 +20,10 @@ Another problem that I found while using `megadl` is the lack of options to down
 
 To solve this problem, `mego` accepts as arguments a path of file(s) containing a list of Mega download links. `mego` will open the file and start downloading the files listed in it. Once the download of the file successfully terminated, `mego` will add a `#` before the link and write it in the file, preventing the next execution to re-download the file. `mego` will also mark invalid links it found with the `#-` string.
 
+#### Compatibility
+
+Because this script is a wrapper around the `megadl` command, it heavily depends on the outputs of the command. If you have problems using this script, be sure to use the version 1.10.2 of `megatools`.
+
 ### Usage
 
 ```
