@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"flag"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -12,17 +11,18 @@ import (
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/jessevdk/go-flags"
 )
 
-const (
-	retryInterval = time.Minute
-)
+type options struct {
+	Speed uint          `short:"s" long:"speed-limit" description:"Speed limit passed to megadl as --limit-speed" default:"0" value-name:"SPEED"`
+	Pipe  bool          `short:"p" long:"pipe-outputs" description:"Pipe megadl's stdout and stderr"`
+	Retry time.Duration `short:"r" long:"retry" description:"Interval between two retries" default:"1m" value-name:"INTERVAL"`
+}
 
 var (
-	speedFlag    = flag.Uint("l", 0, "speed limit passed to megadl as --limit-speed")
-	pipeFlag     = flag.Bool("p", false, "pipe megadl's stdout and stderr")
-	intervalFlag = flag.Duration("r", retryInterval, "interval between two retries")
-
+	opts      options
 	linkRegex = regexp.MustCompile(`^(?:https?://)?mega\.nz/#.+$`)
 )
 
@@ -48,18 +48,18 @@ func isAlreadyDownloadedError(line, link string) bool {
 
 func downloadRepeat(link string) {
 	for !downloadCommand(link) {
-		errLogger.Printf("Download of \"%s\" failed, waiting %s before retrying.\n", link, retryInterval.String())
-		time.Sleep(*intervalFlag)
+		errLogger.Printf("Download of \"%s\" failed, waiting %s before retrying.\n", link, opts.Retry.String())
+		time.Sleep(opts.Retry)
 	}
 
 	outLogger.Printf("Download of \"%s\" done.\n", link)
 }
 
 func downloadCommand(link string) bool {
-	cmd := exec.Command("megadl", fmt.Sprintf("--limit-speed=%d", *speedFlag), link)
+	cmd := exec.Command("megadl", fmt.Sprintf("--limit-speed=%d", opts.Speed), link)
 
 	var errBuff bytes.Buffer
-	if *pipeFlag {
+	if opts.Pipe {
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = io.MultiWriter(os.Stderr, &errBuff)
 	} else {
@@ -132,9 +132,24 @@ func writeFilesList(path string, links []string) {
 }
 
 func main() {
-	flag.Parse()
+	parser := flags.NewParser(&opts, flags.Default)
+	parser.Usage = "mego [-s SPEED] [-p] [-r INTERVAL] LINK... LINK_PATH..."
 
-	for _, arg := range flag.Args() {
+	args, err := parser.Parse()
+	if err != nil {
+		if flagsErr, ok := err.(*flags.Error); ok && flagsErr.Type == flags.ErrHelp {
+			os.Exit(0)
+		} else {
+			os.Exit(1)
+		}
+	}
+
+	if len(args) == 0 {
+		parser.WriteHelp(os.Stdout)
+		os.Exit(1)
+	}
+
+	for _, arg := range args {
 		if isValidLink(arg) {
 			downloadRepeat(arg)
 		} else {
