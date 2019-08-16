@@ -18,7 +18,7 @@ import (
 type options struct {
 	Speed uint          `short:"s" long:"speed-limit" description:"Speed limit passed to megadl as --limit-speed" default:"0" value-name:"SPEED"`
 	Pipe  bool          `short:"p" long:"pipe-outputs" description:"Pipe megadl's stdout and stderr"`
-	Retry time.Duration `short:"r" long:"retry" description:"Interval between two retries" default:"1m" value-name:"INTERVAL"`
+	Retry time.Duration `short:"r" long:"retry" description:"Interval between two retries" default:"15min" value-name:"INTERVAL"`
 }
 
 var (
