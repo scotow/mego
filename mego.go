@@ -133,7 +133,7 @@ func writeFilesList(path string, links []string) {
 
 func main() {
 	parser := flags.NewParser(&opts, flags.Default)
-	parser.Usage = "mego [-s SPEED] [-p] [-r INTERVAL] LINK... LINK_PATH..."
+	parser.Usage = "[-s SPEED] [-p] [-r INTERVAL] LINK... LINK_PATH..."
 
 	args, err := parser.Parse()
 	if err != nil {
