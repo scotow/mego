@@ -97,7 +97,7 @@ func downloadFromFilesList(path string) {
 	// Parsing links in file.
 	for _, line := range lines {
 		line = strings.TrimSpace(line)
-		if line == "" {
+		if len(line) == 0 {
 			continue
 		}
 
