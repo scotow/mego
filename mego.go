@@ -16,14 +16,15 @@ import (
 )
 
 type options struct {
-	Speed uint          `short:"s" long:"speed-limit" description:"Speed limit passed to megadl as --limit-speed" default:"0" value-name:"SPEED"`
-	Pipe  bool          `short:"p" long:"pipe-outputs" description:"Pipe megadl's stdout and stderr"`
-	Retry time.Duration `short:"r" long:"retry" description:"Interval between two retries" default:"15min" value-name:"INTERVAL"`
+	Speed       uint          `short:"s" long:"speed-limit" description:"Speed limit passed to megatools dl as --limit-speed" default:"0" value-name:"SPEED"`
+	Pipe        bool          `short:"p" long:"pipe-outputs" description:"Pipe megatools's stdout and stderr"`
+	Retry       time.Duration `short:"r" long:"retry" description:"Interval between two retries" default:"15min" value-name:"INTERVAL"`
+	CommandPath string        `short:"c" long:"command" description:"Path to the megatools command" default:"megatools" value-name:"COMMAND_PATH"`
 }
 
 var (
 	opts      options
-	linkRegex = regexp.MustCompile(`^(?:https?://)?mega\.nz/#.+$`)
+	linkRegex = regexp.MustCompile(`^(?:https?://)?mega\.nz/(?:(?:file|folder).+)?#.+$`)
 )
 
 var (
@@ -40,7 +41,7 @@ func isAlreadyDownloadedError(line, link string) bool {
 		return true
 	}
 	// Typo in the original program.
-	if strings.HasPrefix(line, fmt.Sprintf("ERROR: Download failed for '%s': Can't rename donwloaded temporary file ", link)) {
+	if strings.HasPrefix(line, fmt.Sprintf("ERROR: Download failed for '%s': Local file already exists:", link)) {
 		return true
 	}
 	return false
@@ -56,7 +57,7 @@ func downloadRepeat(link string) {
 }
 
 func downloadCommand(link string) bool {
-	cmd := exec.Command("megadl", fmt.Sprintf("--limit-speed=%d", opts.Speed), link)
+	cmd := exec.Command(opts.CommandPath, "dl", fmt.Sprintf("--limit-speed=%d", opts.Speed), link)
 
 	var errBuff bytes.Buffer
 	if opts.Pipe {
@@ -131,9 +132,14 @@ func writeFilesList(path string, links []string) {
 	}
 }
 
+func commandExists(cmd string) bool {
+	_, err := exec.LookPath(cmd)
+	return err == nil
+}
+
 func main() {
 	parser := flags.NewParser(&opts, flags.Default)
-	parser.Usage = "[-s SPEED] [-p] [-r INTERVAL] LINK... LINK_PATH..."
+	parser.Usage = "[-c COMMAND_PATH] [-s SPEED] [-p] [-r INTERVAL] LINK... LINK_PATH..."
 
 	args, err := parser.Parse()
 	if err != nil {
@@ -146,6 +152,11 @@ func main() {
 
 	if len(args) == 0 {
 		parser.WriteHelp(os.Stdout)
+		os.Exit(1)
+	}
+
+	if !commandExists(opts.CommandPath) {
+		errLogger.Printf("Cannot find command \"%s\".\n", opts.CommandPath)
 		os.Exit(1)
 	}
 

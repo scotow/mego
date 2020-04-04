@@ -1,7 +1,7 @@
 # Maintainer: Benjamin Lopez <contact@scotow.com>
 
 pkgname=mego
-pkgver=1.2.1
+pkgver=1.3.0
 pkgrel=1
 pkgdesc="A simple megadl wrapper with auto-retry and download list"
 arch=('x86_64')
