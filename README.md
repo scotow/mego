@@ -22,7 +22,7 @@ To solve this problem, `mego` accepts as arguments a path of file(s) containing 
 
 #### Compatibility
 
-Because this script is a wrapper around the `megatools` command, it heavily depends on the outputs of the command. If you have problems using this script, be sure to use the version 1.11.0 (04.04.20) of `megatools`. You can download the latest version [here](https://megatools.megous.com/builds/experimental/).
+Because this script is a wrapper around the `megatools` command, it heavily depends on the outputs of the command. If you have problems using this script, be sure to use the version 1.11.0 (04.04.20) of `megatools`. You can download the latest version [here](https://megatools.megous.com/builds/experimental/) or use the [megatools.PKGBUILD](https://github.com/scotow/mego/blob/master/megatools.PKGBUILD) file available in this repo.
 
 ### Usage
 
