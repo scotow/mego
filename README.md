@@ -1,16 +1,16 @@
 # mego 💾
 
-Mego is a simple [megatools](https://megatools.megous.com) command wrapper, allowing you to use the `megatools dl` command with a download list of links and adds an auto-try tool.
+Mego is a simple [megatools](https://megatools.megous.com) command wrapper, allowing you to use the `megatools dl` command with a list of links and adds an auto-try tool.
 
-### Ideas
+### Idea
 
-Megatools is a collection of programs for accessing Mega.nz services from a command line of your desktop or server.
+Megatools is a collection of programs used to access [mega.nz](https://mega.nz) services from the command line.
 
 #### Auto-retry
 
-While using the `megatools dl` command to download a bunch of large files, I often found myself being blocked by Mega because I exceeded the bandwidth limit (aka. error 509).
+While using the `megatools dl` command to download a bunch of large files, I often found myself being blocked by Mega for reaching the allowed quota (aka. error 509).
 
-Indeed, Mega allows users to download a few (apparently not fixed) number of GB per day (once again, apparently not fixed).
+Indeed, Mega allows users to download a few GB per day (apparently not fixed).
 
 By default `megatools dl` only retries 3 times when this error occurred, preventing the download of file during the night or while being away from the computer. To fix this problem, `mego` checks the error code returned by `megatools dl`, and retry if the command failed.
 
