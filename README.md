@@ -38,4 +38,4 @@ Application Options:
   -c, --command=COMMAND_PATH    Path to the megatools command (default: megatools)
 ```
 
-NB: The whole content of a *list file* is read and kept in memory. Every time a file is downloaded, the content of the *list file* will be overwritten. So please do not use a *list file* as a queue during execution.
+NB: The whole content of a list file is read and kept in memory. Every time a file is downloaded, the content of the list file will be overwritten. So please do not use a list file as a queue during execution.
